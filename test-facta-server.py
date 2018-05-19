@@ -7,6 +7,12 @@ if __name__ == '__main__':
         # Hash a canonical representation of the JSON object
         hash = hashlib.sha256(json.dumps(statements, sort_keys=True)).hexdigest()
 
+        # check that we are being sent something that looks like a statement list
+        if type(statements) != list:
+            raise Exception("invalid data, wrong type")
+        if [1 for x in statements if (type(x) != dict) or ("@context" not in x)]:
+            raise Exception("invalid data, missing attribute")
+
         assertion_time = datetime.datetime.now().isoformat()
         assertion = {
             "@context": "https://kendra.io/schema/v1",
