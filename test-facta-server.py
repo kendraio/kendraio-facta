@@ -1,0 +1,44 @@
+import sys
+sys.path.append('../kendraio-api')
+import kendraio_api_server, json, hashlib, sys, time, psycopg2, datetime
+
+if __name__ == '__main__':
+    def assertion_handler(source_id, statements, conn):
+        # Hash a canonical representation of the JSON object
+        hash = hashlib.sha256(json.dumps(statements, sort_keys=True)).hexdigest()
+
+        assertion_time = datetime.datetime.now().isoformat()
+        assertion = {
+            "@context": "https://kendra.io/schema/v1",
+            "@type": "statement-container",
+            "@id": "facta-statement-%s-%s" % (hash, assertion_time),
+            "source_jwt_sub": source_id,
+            "time_received": assertion_time,
+            "statements": statements,
+            "statement-hash": hash
+        }
+
+        # and write to database
+        cur = conn.cursor()
+        cur.execute('INSERT INTO received_statements (time, subject, statement) VALUES (%s,%s,%s);',
+                    (assertion_time, source_id, json.dumps(assertion, sort_keys=True)))
+        conn.commit()
+        cur.close()
+
+        return {"received": assertion}
+
+    # load credentials from stdin
+    credentials = json.loads(sys.stdin.read())
+
+    # passwordless login via UNIX sockets
+    conn = psycopg2.connect(dbname=credentials["POSTGRES_DATABASE"],
+                            user=credentials["POSTGRES_USERNAME"])
+    print "created database connection"
+
+    server = kendraio_api_server.api_server("localhost", 8080)
+    print "created http server"
+
+    server.add_credentials(credentials)
+    server.add_handler('/assert', assertion_handler, context=conn)
+    server.run()
+
