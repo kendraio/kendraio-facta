@@ -46,7 +46,7 @@ if __name__ == '__main__':
                             user=credentials["POSTGRES_USERNAME"])
     print "created database connection"
 
-    server = kendraio_api_server.api_server("localhost", 8080)
+    server = kendraio_api_server.api_server("localhost", int(sys.argv[1]))
     print "created http server"
 
     server.add_credentials(credentials)
