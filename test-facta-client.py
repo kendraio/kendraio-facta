@@ -1,9 +1,11 @@
+#!/usr/bin/python
 import requests, sys, json
 
 try:
-    authtoken = sys.argv[1]
+    target_uri = sys.argv[1]
+    authtoken = sys.argv[2]
 except:
-    print >> sys.stderr, "Usage: python test-facta-client.py [JWT token]"
+    print >> sys.stderr, "Usage: python test-facta-client.py [target URI] [JWT token]"
     exit(1)
 
 statements = [
@@ -15,6 +17,6 @@ statements = [
     }
 ]
 
-print requests.post("http://localhost:8080/assert",
+print requests.post(target_uri,
                     headers={'authorization': 'Bearer %s' % authtoken},
                     json=statements).json()
