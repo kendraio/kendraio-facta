@@ -17,6 +17,6 @@ statements = [
     }
 ]
 
-print requests.post(target_uri,
+print json.dumps(requests.post(target_uri,
                     headers={'authorization': 'Bearer %s' % authtoken},
-                    json=statements).json()
+                              json=statements).json(), sort_keys=True)
