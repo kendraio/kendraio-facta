@@ -1,0 +1,33 @@
+# Partial excerpt from nginx configuration file, to show how test servers are run
+server {
+	listen 80;
+	listen [::]:80;
+
+	index index.html;
+
+        include mime.types;
+        types {
+	    application/ld+json jsonld;
+	}
+
+	location /api/
+	{
+        proxy_pass http://127.0.0.1:8080/;
+    	}
+
+	location /api-testing/
+	{
+        proxy_pass http://127.0.0.1:8081/;
+    	}
+
+	location /api-semantic-testing/
+	{
+        proxy_pass http://127.0.0.1:8082/;
+    	}
+
+	location /
+	{
+        try_files $uri $uri/ =404;
+    	}	
+}
+
