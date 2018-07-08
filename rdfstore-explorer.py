@@ -35,8 +35,8 @@ if __name__ == '__main__':
     g, ident = setup()
     sid = BNode()
     g.add((sid, RDF.subject, URIRef("http://facta.kendra.io/")))
-    results = g.query("select ?s where {?s ?p ?o} limit 10")
+    results = g.query("select distinct ?p ?o where {?s ?p ?o} limit 100")
     for row in results:
-            print row.s
+            print row.p, row.o
     teardown(g, None)
     
