@@ -9,13 +9,13 @@ except:
     exit(1)
 
 statements = [
-    {"@context": "https://kendra.io/schema/v1",
-     "@id": "000001",
-     "@type": "test-statement",
-     "salutation": "hello",
-     "subject": "world"
-    }
-]
+        {# "@context": "https://kendra.io/schema/v1",
+                 "@id": "http://kendra.io/000001",
+                 "@type": "http://kendra.io/test-statement",
+                 "http://kendra.io/name": "hello",
+                 "http://kendra.io/description": "world"
+                }
+    ]
 
 print json.dumps(requests.post(target_uri,
                     headers={'authorization': 'Bearer %s' % authtoken},

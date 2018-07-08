@@ -3,6 +3,7 @@ import sys
 sys.path.append('../kendraio-api')
 import kendraio_api_server, json, hashlib, sys, time, psycopg2, datetime
 import jsonschema
+from StringIO import StringIO
 
 # adapted from https://github.com/RDFLib/rdflib-sqlalchemy
 from rdflib import plugin, Graph, Literal, URIRef, BNode, RDF
@@ -17,6 +18,8 @@ from rdflib_sqlalchemy import registerplugins
 DB_URI = Literal('postgresql+psycopg2:///kendraio_facta')
 
 # This identifies the set of database tables used for storage
+# Note that this does not directly correspond to the DB table name:
+# not sure how the mapping is made...
 DB_ident = URIRef("rdflib_semantic_store")
 
 # open a store with this ident
@@ -33,9 +36,13 @@ if __name__ == '__main__':
         # check that we are being sent something that looks like a statement list
         if type(statements) != list:
             raise Exception("invalid data, wrong type")
-        if [1 for x in statements if (type(x) != dict) or ("@context" not in x)]:
+        if [1 for x in statements if (type(x) != dict)]:
             raise Exception("invalid data, missing attribute")
 
+#        if [1 for x in statements if ("@context" not in x)]:
+#            raise Exception("invalid data, context missing")
+
+        
         # And now validate that in more detail for every statement in the list
         for x in statements:
             jsonschema.validate(x, context["json-ld-schema"])
@@ -57,11 +64,12 @@ if __name__ == '__main__':
         cur.close()
 
         store = setup_rdf_store(DB_ident)
-        graph = Graph(store, identifier=URIRef("foobar"))
+        graph = Graph(store, identifier=URIRef(assertion_time+"_"+source_id))
         graph.open(DB_URI, create=True)
 
-        # and add this single triple to the store
-        graph.add((URIRef("this"), RDF.subject, URIRef("http://facta-test.kendra.io/")))
+        for s in statements:
+            graph.parse(StringIO(json.dumps(s)), format="json-ld")
+
         graph.close()
 
         return {"received": statements}
