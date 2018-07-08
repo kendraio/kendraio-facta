@@ -10,14 +10,16 @@ from rdflib_sqlalchemy import registerplugins
 from StringIO import StringIO
 
 statements = [
-    {# "@context": "https://kendra.io/schema/v1",
-     "@id": "http://kendra.io/000001",
-     "@type": "http://kendra.io/test-statement",
-     "http://kendra.io/name": "hello",
-     "http://kendra.io/description": "world"
-    }
-]
-
+        {    "@context": {
+                    "@language": "en",
+                    "@vocab": "http://kendra.io/terms/"
+                },
+                 "@id": "http://kendra.io/000001",
+                 "@type": "http://kendra.io/test-statement",
+                 "name": "hello",
+                 "description": "world"
+                }
+    ]
 
 statements2 = [{
     "@id": "http://example.org/0000001",

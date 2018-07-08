@@ -9,11 +9,14 @@ except:
     exit(1)
 
 statements = [
-        {# "@context": "https://kendra.io/schema/v1",
+        {    "@context": {
+                    "@language": "en",
+                    "@vocab": "http://kendra.io/terms/"
+                },
                  "@id": "http://kendra.io/000001",
                  "@type": "http://kendra.io/test-statement",
-                 "http://kendra.io/name": "hello",
-                 "http://kendra.io/description": "world"
+                 "name": "hello",
+                 "description": "world"
                 }
     ]
 
