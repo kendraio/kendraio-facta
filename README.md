@@ -18,3 +18,5 @@ to run the client test program run:
 
   python test-facta-client.py [API URI] [authorization-token]
 
+To do: integrate pyld/jsonld functionality with RDFlib
+
