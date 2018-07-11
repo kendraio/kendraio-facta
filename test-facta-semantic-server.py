@@ -20,7 +20,8 @@ DB_URI = Literal('postgresql+psycopg2:///kendraio_facta')
 # This identifies the set of database tables used for storage
 # Note that this does not directly correspond to the DB table name:
 # not sure how the mapping is made...
-DB_ident = URIRef("rdflib_semantic_store")
+semantic_store_id = "release_version_semantic_store"
+DB_ident = URIRef(semantic_store_id)
 
 # open a store with this ident
 def setup_rdf_store(ident):
@@ -29,19 +30,26 @@ def setup_rdf_store(ident):
     return store
 
 if __name__ == '__main__':
+    def stub_handler(source_id, statements, context):
+        # Attempt to canonicalize this object by round-tripping decoding and re-encoding
+        statements = json.loads(json.dumps(statements, sort_keys=True))
+
+        return {"received": statements, "comment": "this is a stub handler that only canonicalizes and echoes input"}
+
     def assertion_handler(source_id, statements, context):
         # Attempt to cnonicalize this object by round-tripping decoding and re-encoding
         statements = json.loads(json.dumps(statements, sort_keys=True))
 
         # check that we are being sent something that looks like a statement list
         if type(statements) != list:
-            raise Exception("invalid data, wrong type")
+            raise Exception("invalid data, should be a list of JSON-LD objects")
+
+       # and now perform a trivial check on every object
         if [1 for x in statements if (type(x) != dict)]:
-            raise Exception("invalid data, missing attribute")
+            raise Exception("invalid data, top-level list item is not an object")
 
-#        if [1 for x in statements if ("@context" not in x)]:
-#            raise Exception("invalid data, context missing")
-
+        if [1 for x in statements if ("@context" not in x)]:
+            raise Exception("invalid data, object in top-level list does not have an @context attribute")
         
         # And now validate that in more detail for every statement in the list
         for x in statements:
@@ -53,8 +61,10 @@ if __name__ == '__main__':
         conn = context["db-connection"]
         cur = conn.cursor()
         statements_text = json.dumps(statements, sort_keys=True)
-        cur.execute('INSERT INTO received_statements (time, subject, statement, sha256_hash) VALUES (%s,%s,%s,%s);',
+        cur.execute('INSERT INTO received_statements (time, server_program_id, semantic_store_id, subject, statement, sha256_hash) VALUES (%s,%s,%s,%s,%s,%s);',
                     (assertion_time,
+                     sys.argv[0],
+                     semantic_store_id,
                      source_id,
                      statements_text,
                      hashlib.sha256(statements_text).hexdigest()
@@ -87,6 +97,12 @@ if __name__ == '__main__':
 
     server.add_credentials(credentials)
     server.add_handler('/assert', assertion_handler,
+                       context={"db-connection": conn,
+                                "json-ld-schema": json.loads(open("json-ld-schema.json").read())})
+    server.add_handler('/revoke', stub_handler,
+                       context={"db-connection": conn,
+                                "json-ld-schema": json.loads(open("json-ld-schema.json").read())})
+    server.add_handler('/query', stub_handler,
                        context={"db-connection": conn,
                                 "json-ld-schema": json.loads(open("json-ld-schema.json").read())})
     server.run()
