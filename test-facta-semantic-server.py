@@ -92,7 +92,8 @@ if __name__ == '__main__':
         graph = ConjunctiveGraph(rdf_store)
         graph.open(DB_URI)
         results = graph.query("select ?s ?p ?o where {?s ?p ?o} limit 100")
-        statements = [[row.s, row.p, row.o] for row in results]
+        # Inelegant, but works: serialize to JSON string, then re-parse
+        statements = json.loads(results.serialize(format="json"))
         graph.close()
         
         return {"result": statements}

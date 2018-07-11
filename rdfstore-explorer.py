@@ -53,8 +53,8 @@ if __name__ == '__main__':
     g, rdf_store_ident = setup("bar")
     g.add((BNode(), RDF.subject, URIRef("http://facta.kendra.io/bar")))
     g, rdf_store_ident = setup_conjunctive()
-    results = g.query("select ?p ?o where {?s ?p ?o} limit 100")
-    for row in results:
-            print row.p, row.o
+    results = g.query("select ?s ?p ?o where {?s ?p ?o} limit 100")
+    # Turn the whole thing into a JSON string...
+    print repr(results.serialize(format="json"))
     teardown(g, None)
     
