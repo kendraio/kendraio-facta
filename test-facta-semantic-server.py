@@ -34,7 +34,7 @@ if __name__ == '__main__':
         # Attempt to canonicalize this object by round-tripping decoding and re-encoding
         statements = json.loads(json.dumps(statements, sort_keys=True))
 
-        return {"received": statements, "comment": "this is a stub handler that only canonicalizes and echoes input"}
+        return {"comment": "this is a stub handler for an unimplemented API method"}
 
     def assertion_handler(source_id, statements, context):
         # Attempt to cnonicalize this object by round-tripping decoding and re-encoding
@@ -73,8 +73,8 @@ if __name__ == '__main__':
         conn.commit()
         cur.close()
 
-        store = setup_rdf_store(DB_ident)
-        graph = Graph(store, identifier=URIRef(assertion_time+"_"+source_id))
+        rdf_store = context["rdf_store"]
+        graph = Graph(rdf_store, identifier=URIRef(assertion_time+"_"+source_id))
         graph.open(DB_URI, create=True)
 
         for s in statements:
@@ -92,18 +92,19 @@ if __name__ == '__main__':
                             user=credentials["POSTGRES_USERNAME"])
     print "created database connection"
 
-    server = kendraio_api_server.api_server("localhost", int(sys.argv[1]))
+    http_server = kendraio_api_server.api_server("localhost", int(sys.argv[1]))
     print "created http server"
 
-    server.add_credentials(credentials)
-    server.add_handler('/assert', assertion_handler,
-                       context={"db-connection": conn,
-                                "json-ld-schema": json.loads(open("json-ld-schema.json").read())})
-    server.add_handler('/revoke', stub_handler,
-                       context={"db-connection": conn,
-                                "json-ld-schema": json.loads(open("json-ld-schema.json").read())})
-    server.add_handler('/query', stub_handler,
-                       context={"db-connection": conn,
-                                "json-ld-schema": json.loads(open("json-ld-schema.json").read())})
-    server.run()
+    context={"db-connection": conn,
+             "json-ld-schema": json.loads(open("json-ld-schema.json").read()),
+             "rdf_store": setup_rdf_store(DB_ident)}
+
+    http_server.add_credentials(credentials)
+    http_server.add_handler('/assert', assertion_handler,
+                            context=context)
+    http_server.add_handler('/revoke', stub_handler,
+                            context=context)
+    http_server.add_handler('/query', stub_handler,
+                            context=context)
+    http_server.run()
 
