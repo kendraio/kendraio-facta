@@ -6,7 +6,7 @@ import jsonschema
 from StringIO import StringIO
 
 # adapted from https://github.com/RDFLib/rdflib-sqlalchemy
-from rdflib import plugin, Graph, Literal, URIRef, BNode, RDF
+from rdflib import plugin, Graph, Literal, URIRef, BNode, RDF, ConjunctiveGraph
 from rdflib.store import Store
 
 from rdflib_sqlalchemy import registerplugins
@@ -84,6 +84,19 @@ if __name__ == '__main__':
 
         return {"received": statements}
 
+    def query_handler(source_id, statements, context):
+        # Attempt to cnonicalize this object by round-tripping decoding and re-encoding
+        statements = json.loads(json.dumps(statements, sort_keys=True))
+
+        rdf_store = context["rdf_store"]
+        graph = ConjunctiveGraph(rdf_store)
+        graph.open(DB_URI)
+        results = graph.query("select ?s ?p ?o where {?s ?p ?o} limit 100")
+        statements = [[row.s, row.p, row.o] for row in results]
+        graph.close()
+        
+        return {"result": statements}
+
     # load credentials from stdin
     credentials = json.loads(sys.stdin.read())
 
@@ -104,7 +117,7 @@ if __name__ == '__main__':
                             context=context)
     http_server.add_handler('/revoke', stub_handler,
                             context=context)
-    http_server.add_handler('/query', stub_handler,
+    http_server.add_handler('/query', query_handler,
                             context=context)
     http_server.run()
 
