@@ -18,5 +18,11 @@ to run the client test program run:
 
   python test-facta-client.py [API URI] [authorization-token]
 
+To remove the entire contents of the semantic store:
+
+  cat [credentials-file] | sudo -u [facta-daemon-username] python ./delete-all-facta-semantic-data.py [semanttic-store-name]
+
+Note that if you do the above with store name "release_version_semantic_store", you will blow away the semantic store for the live API instance
+
 To do: integrate pyld/jsonld functionality with RDFlib
 
