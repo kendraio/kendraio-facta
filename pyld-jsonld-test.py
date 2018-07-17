@@ -17,6 +17,7 @@ data = [
         "ical:summary": "Hawkwind Concert",
         "ical:dtstart": "2011-04-09T20:00Z",
         "kf:venue": "kf:FPARK",
+        "kf:testing": { "testing2:something": "that"},
         "@id": "http://dfgdsfgdfg.example/1"
     },
     {
