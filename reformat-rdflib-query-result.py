@@ -24,6 +24,16 @@ if result_data["head"]["vars"] != ["subject", "predicate", "object"]:
 
 result = {"@default": map(reformat_node, result_data["results"]["bindings"])}
 
+context =  {
+    "@context": {
+        "@vocab": "http://facta.kendra.io/vocab#",
+        "kv": "http://facta.kendra.io/vocab#",
+        "kendra": "http://kendra.io/types#",
+        "kuid": "http://kendra.io/uuid#",
+        "schema": "http://schema.org/"
+    }
+}
+
 # print json.dumps(result, indent=4)
-print json.dumps(jsonld.compact(jsonld.from_rdf(result), {}), indent=4)
+print json.dumps(jsonld.compact(jsonld.from_rdf(result), context), indent=4)
 
