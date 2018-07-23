@@ -30,11 +30,13 @@ data = [
     {
         "@type": "kf:KLocation",
         "@id": "kf:NYA",
+        "kf:size": 1000,
         "ical:location": "New Orleans Arena, New Orleans, Louisiana, USA",
     },
     {
         "@type": "kf:KLocation",
         "@id": "kf:FPARK",
+        "kf:size": 2000,
         "ical:location": "Finsbury Park",
     }
 ]
