@@ -28,8 +28,8 @@ def main():
     }
     for entry in cur.fetchall():
         statement, subject, timestamp = entry
-        rdf = jsonld.normalize(statement)
-        statement = jsonld.compact(jsonld.from_rdf(rdf), context)
+#        rdf = jsonld.normalize(statement)
+#        statement = jsonld.compact(jsonld.from_rdf(rdf), context)
 #        statement = rdf
         print "STATEMENT:", timestamp.isoformat(), subject
         print json.dumps(statement, indent=4, sort_keys=True)
