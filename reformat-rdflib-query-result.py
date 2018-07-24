@@ -121,6 +121,14 @@ def fix_leaves(s):
     # otherwise
     return s
 
+def filter_bad_ids(s):
+    if type(s) == list:
+        return [filter_bad_ids(ss) for ss in s]
+    if type(s) == dict:
+        return dict([(k, filter_bad_ids(v)) for k, v in s.items() if not (k=="@id" and not ":" in v)])
+    # otherwise
+    return s
+
 def purge_blacklisted(s, blk):
     if type(s) == list:
         return [purge_blacklisted(v, blk) for v in s if id_of(v) not in blk]
@@ -145,10 +153,10 @@ contained = dict(contained_items(compacted_graph))
 referenced = dict(contained_references(compacted_graph))
 
 print json.dumps(
-    extract_by_type(
-        rewrite_references(
-            [s for s in compacted_graph],
-            contained),
-        ["kendra:InclusionRelationship"]),
+    filter_bad_ids(
+        extract_by_type(
+            rewrite_references(
+                [s for s in compacted_graph],
+                contained),
+            ["kendra:InclusionRelationship", "kendra:TextSelection"])),
     indent=4)
-
