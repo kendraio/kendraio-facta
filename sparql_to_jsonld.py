@@ -130,8 +130,7 @@ def extract_salient_results(compacted_graph, contained, valid_types):
                 contained),
             ["kendra:InclusionRelationship", "kendra:TextSelection"])),
 
-def result_data_to_jsonld(result, context):
-    result_data = result["result"]
+def result_data_to_jsonld(result_data, context):
 
     if set(result_data["head"]["vars"]) != set(["subject", "predicate", "object"]):
         raise Exception("result not in s/p/o format")

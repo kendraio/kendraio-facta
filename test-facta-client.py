@@ -20,6 +20,9 @@ statements = [
                 }
     ]
 
+if "--stdin" in sys.argv[1:]:
+    statements = json.loads(sys.stdin.read())
+    
 print json.dumps(requests.post(target_uri,
                     headers={'authorization': 'Bearer %s' % authtoken},
                               json=statements).json(), sort_keys=True)
