@@ -130,6 +130,11 @@ def extract_salient_results(compacted_graph, contained, valid_types):
                 contained),
             ["kendra:InclusionRelationship", "kendra:TextSelection"])),
 
+def quicksearch(query, results):
+    if query.get("@type") != "quicksearch":
+        return "not a quicksearch"
+    return results
+
 def result_data_to_jsonld(result_data, context):
 
     if set(result_data["head"]["vars"]) != set(["subject", "predicate", "object"]):
@@ -146,4 +151,5 @@ def result_data_to_jsonld(result_data, context):
     contained = dict(contained_items(compacted_graph))
 
     return compacted_graph, contained
+    
     
