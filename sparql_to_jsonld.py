@@ -130,10 +130,29 @@ def extract_salient_results(compacted_graph, contained, valid_types):
                 contained),
             ["kendra:InclusionRelationship", "kendra:TextSelection"])),
 
-def quicksearch(query, results):
+def filter_dict_trees(x, match_fn):
+    if type(x) in [list, tuple]:
+        return [filter_dict_trees(y, match_fn) for y in x if type(y) != dict or match_fn(y)]
+    return x
+
+def get_items_recursive(d):
+    if type(d) in [list, tuple]:
+        return list_concat([get_items_recursive(v) for v in d])
+    if type(d) == dict:
+        return ([(k, v) for k, v in d.items() if isinstance(k, basestring) and isinstance(v, basestring)]
+                + list_concat([get_items_recursive(v) for k, v in d.items()]))
+    return []
+
+# CAUTION: note that a tuple of unicode != tuple of string!!!!
+def all_items_in(needed, proposed):
+    return len([1 for e in set(proposed) if e in needed]) == len(set(needed))
+
+def quicksearch(results, query):
     if query.get("@type") != "quicksearch":
         return "not a quicksearch"
-    return results
+    needed_pairs = query["match"].items()
+    return filter_dict_trees(results,
+                        lambda x: all_items_in(needed_pairs, get_items_recursive(x))) 
 
 def result_data_to_jsonld(result_data, context):
 

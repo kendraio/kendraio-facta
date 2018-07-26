@@ -1,13 +1,13 @@
 import sys, json
 import sparql_to_jsonld as s2j
-    
-default_query = {
+
+default_query = json.loads(json.dumps({
     "@type": "quicksearch",
     "match": {
-	"@type": "kendra:TextSelection",
+	"@type": "kendra:InclusionRelationship",
 	"schema:name": "Dog"
     }
-}
+}))
 
 def main():
     context =  {
@@ -29,10 +29,8 @@ def main():
         ["kendra:InclusionRelationship", "kendra:TextSelection"])
 
     # Apply the very simple "quicksearch" mapper
-    results = s2j.quicksearch(default_query, results)
+    results = s2j.quicksearch(results, default_query)
     
-    print json.dumps(
-        results,
-        indent=4)
+    print json.dumps(results, indent=4)
 
 main()

@@ -38,7 +38,7 @@ if __name__ == '__main__':
         return {"comment": "this is a stub handler for an unimplemented API method"}
 
     def assertion_handler(source_id, statements, context):
-        # Attempt to cnonicalize this object by round-tripping decoding and re-encoding
+        # Attempt to canonicalize this object by round-tripping decoding and re-encoding
         statements = json.loads(json.dumps(statements, sort_keys=True))
 
         # check that we are being sent something that looks like a statement list
@@ -85,9 +85,9 @@ if __name__ == '__main__':
 
         return {"received": statements}
 
-    def query_handler(source_id, statements, context):
+    def query_handler(source_id, query, context):
         # Attempt to cnonicalize this object by round-tripping decoding and re-encoding
-        statements = json.loads(json.dumps(statements, sort_keys=True))
+        query = json.loads(json.dumps(query, sort_keys=True))
 
         rdf_store = context["rdf_store"]
         graph = ConjunctiveGraph(rdf_store)
@@ -109,11 +109,15 @@ if __name__ == '__main__':
         }
 
         compacted_graph, contained = s2j.result_data_to_jsonld(statements, context)
+        result = s2j.extract_salient_results(
+            compacted_graph,
+            contained,
+            ["kendra:InclusionRelationship", "kendra:TextSelection"])
+
+        result = s2j.quicksearch(result, query)
 
         return {"result": 
-            s2j.extract_salient_results(compacted_graph,
-                                        contained,
-                                        ["kendra:InclusionRelationship", "kendra:TextSelection"])}
+                result}
         
     # load credentials from stdin
     credentials = json.loads(sys.stdin.read())
